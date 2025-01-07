@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackContext
 import sqlite3
 
 # --- Configurations ---
@@ -95,14 +95,14 @@ def get_tasks():
 # --- Telegram Bot ---
 bot = Bot(BOT_TOKEN)
 
-def start(update, context):
+def start(update: Update, context: CallbackContext):
     username = update.effective_user.username
     add_user(username)
     update.message.reply_text(
         f"Welcome to Tiny Hash, @{username}!\nYou have {INITIAL_ENERGY} energy to start mining!"
     )
 
-def mine(update, context):
+def mine(update: Update, context: CallbackContext):
     username = update.effective_user.username
     user = get_user(username)
     if not user:
@@ -116,7 +116,7 @@ def mine(update, context):
         update_energy(username, -10)
         update.message.reply_text(f"Mining successful! 10 energy consumed. Remaining energy: {energy - 10}")
 
-def tasks(update, context):
+def tasks(update: Update, context: CallbackContext):
     username = update.effective_user.username
     user = get_user(username)
     if not user:
@@ -133,7 +133,7 @@ def tasks(update, context):
         message += f"- {task[0]}: {task[1]} energy\n"
     update.message.reply_text(message)
 
-def add_task_command(update, context):
+def add_task_command(update: Update, context: CallbackContext):
     if update.effective_user.username != ADMIN_USERNAME:
         update.message.reply_text("You are not authorized to add tasks.")
         return
